@@ -1,4 +1,4 @@
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { save } from '@/actions/post';
 import { Pencil, Plus } from 'lucide-react';
 import { FormInput } from '../ui/form-input';
@@ -7,11 +7,21 @@ import { Textarea } from '../ui/textarea';
 
 export function PostFormModal({ initialData }: { initialData?: any }) {
     const router = useRouter();
+    const formRef = useRef<HTMLFormElement>(null);
     const [state, action, pending] = useActionState(save, initialData);
+    const [formData, setFormData] = useState(initialData);
     const [isShow, setIsShow] = useState(false);
 
     useEffect(() => {
+        setFormData(initialData);
+    }, [initialData]);
+
+    useEffect(() => {
         if (state?.success === true) {
+            if (formRef.current) {
+                formRef.current.reset();
+            }
+            setFormData(null);
             setIsShow(false);
             router.push('/');
         }
@@ -34,13 +44,19 @@ export function PostFormModal({ initialData }: { initialData?: any }) {
             <dialog className="modal" role="dialog" open={isShow}>
                 <div className="modal-box z-[9999]">
                     <h3 className="text-lg font-bold">
-                        {!state?.payload?.id ? 'Add New Post' : 'Update Post'}
+                        {!formData?.payload?.id
+                            ? 'Add New Post'
+                            : 'Update Post'}
                     </h3>
-                    <form className="space-y-4 w-full" action={action}>
+                    <form
+                        ref={formRef}
+                        className="space-y-4 w-full"
+                        action={action}
+                    >
                         <input
                             type="hidden"
                             name="id"
-                            value={state?.payload?.id}
+                            defaultValue={formData?.payload?.id}
                         />
                         <FormInput
                             label="Title"
@@ -49,9 +65,9 @@ export function PostFormModal({ initialData }: { initialData?: any }) {
                             type="text"
                             placeholder="Title"
                             defaultValue={
-                                (state?.payload?.title || '') as string
+                                (formData?.payload?.title || '') as string
                             }
-                            error={state?.errors?.title}
+                            error={formData?.errors?.title}
                         />
                         <div>
                             <label className="label">
@@ -65,10 +81,10 @@ export function PostFormModal({ initialData }: { initialData?: any }) {
                                 className="w-full textarea"
                                 placeholder="Content"
                                 defaultValue={
-                                    (state?.payload?.content || '') as string
+                                    (formData?.payload?.content || '') as string
                                 }
                             ></Textarea>
-                            {state?.errors?.content && (
+                            {formData?.errors?.content && (
                                 <p className="label">{state.errors.content}</p>
                             )}
                         </div>
@@ -83,7 +99,8 @@ export function PostFormModal({ initialData }: { initialData?: any }) {
                                 name="category"
                                 className="w-full select"
                                 defaultValue={
-                                    (state?.payload?.category || '') as string
+                                    (formData?.payload?.category ||
+                                        '') as string
                                 }
                             >
                                 <option>Food & Cooking</option>
@@ -91,7 +108,7 @@ export function PostFormModal({ initialData }: { initialData?: any }) {
                                 <option>Travel</option>
                                 <option>Technology</option>
                             </select>
-                            {state?.errors?.category && (
+                            {formData?.errors?.category && (
                                 <p className="label">{state.errors.category}</p>
                             )}
                         </div>

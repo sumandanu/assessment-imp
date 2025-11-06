@@ -1,5 +1,3 @@
-// 'use client';
-
 import { useActionState, useEffect, useState } from 'react';
 import { remove } from '@/actions/post';
 import { Trash2 } from 'lucide-react';
@@ -41,7 +39,7 @@ export function DeleteConfirmModal({ initialData }: { initialData?: any }) {
                         <form action={action}>
                             <input
                                 type="hidden"
-                                value={state?.payload?.id}
+                                defaultValue={state?.payload?.id}
                                 name="id"
                             />
                             <button
