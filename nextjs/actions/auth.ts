@@ -8,8 +8,6 @@ import {
     SignupFormSchema,
 } from '@/lib/definitions';
 import { LoginCredentials, RegisterCredentials } from '@/types';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 
 type ActionState = {
     success?: boolean;
@@ -104,17 +102,13 @@ export const signup = async (
 export async function signout() {
     try {
         await authAPI.logout();
-        const cookieStore = await cookies();
-        cookieStore.delete('auth_token');
-        redirect('/signin');
-        // return { success: true };
+        return { success: true };
     } catch (err: any) {
-        // return {
-        //     success: false,
-        //     errors: err.response?.data?.message || 'Failed to submit data',
-        // };
+        return {
+            success: false,
+            errors: err.response?.data?.message || 'Failed to submit data',
+        };
+    } finally {
+        removeToken();
     }
-    // finally {
-    //     removeToken();
-    // }
 }

@@ -22,8 +22,6 @@ export const getToken = async () => {
 export const removeToken = async () => {
     const cookieStore = await cookies();
     cookieStore.delete(TOKEN_KEY);
-    // cookieStore.set(TOKEN_KEY, '', { maxAge: -1 });
-    // return redirect('/signin');
 };
 
 export const isAuthenticated = (): boolean => {
