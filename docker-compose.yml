@@ -1,0 +1,65 @@
+services:
+  # Nginx service
+  web:
+    image: nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - ./laravel:/var/www/html
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php-fpm
+    networks:
+      - imp-network
+
+  # Php service
+  php-fpm:
+    build:
+      context: ./laravel
+      dockerfile: Dockerfile
+    volumes:
+      - ./laravel:/var/www/html
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: laravel_api
+      DB_USERNAME: root
+      DB_PASSWORD: notSecureChangeMe
+    networks:
+      - imp-network
+
+  # Database Service
+  mysql:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      MYSQL_DATABASE: laravel_api
+      MYSQL_USER: root
+      MYSQL_PASSWORD: laravel
+      MYSQL_ROOT_PASSWORD: notSecureChangeMe
+      TZ: Asia/Jakarta
+    networks:
+      - imp-network
+
+  # PhpMyAdmin service
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8899:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=notSecureChangeMe
+    depends_on:
+      - mysql
+    networks:
+      - imp-network
+
+volumes:
+  db-data:
+
+networks:
+  imp-network:
+    driver: bridge
